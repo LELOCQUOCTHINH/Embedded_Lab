@@ -1,53 +1,71 @@
-| Supported Targets | ESP32 | ESP32-C2 | ESP32-C3 | ESP32-C5 | ESP32-C6 | ESP32-C61 | ESP32-H2 | ESP32-H21 | ESP32-H4 | ESP32-P4 | ESP32-S2 | ESP32-S3 | Linux |
-| ----------------- | ----- | -------- | -------- | -------- | -------- | --------- | -------- | --------- | -------- | -------- | -------- | -------- | ----- |
+# FreeRTOS Scheduler Simulation on ESP-IDF
 
-# Hello World Example
+## 1. Objective
 
-Starts a FreeRTOS task to print "Hello World".
+This project demonstrates the three core scheduling algorithms of FreeRTOS by precisely controlling the kernel's configuration. The goal is to observe and understand the behavior of:
 
-(See the README.md file in the upper level 'examples' directory for more information about examples.)
+1.  **Prioritized Pre-emptive Scheduling (Without Time Slicing)**
+2.  **Prioritized Pre-emptive Scheduling (With Time Slicing)**
+3.  **Co-operative Scheduling**
 
-## How to use example
+## 2. How the Simulation Works
 
-Follow detailed instructions provided specifically for this example.
+The simulation uses three tasks and an idle hook to compete for CPU time on Core 0.
 
-Select the instructions depending on Espressif chip installed on your development board:
+* **`HighPrioTask` (Priority 1):** The "reporter" task that runs every 5 seconds.
+* **`LowPrioTask` (Priority 0):** A "busy-loop" task that increments a counter.
+* **`IdleTask` (Priority 0):** The default system idle task, monitored via a hook.
 
-- [ESP32 Getting Started Guide](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/index.html)
-- [ESP32-S2 Getting Started Guide](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/get-started/index.html)
+## 3. How to Run Each Scenario
 
+To configure each scenario, you must **find and manually edit the `FreeRTOSConfig.h` file** for your project.
 
-## Example folder contents
+In this file, you will override the two key configuration constants:
+* `configUSE_PREEMPTION`
+* `configUSE_TIME_SLICING`
 
-The project **hello_world** contains one source file in C language [hello_world_main.c](main/hello_world_main.c). The file is located in folder [main](main).
+---
 
-ESP-IDF projects are built using CMake. The project build configuration is contained in `CMakeLists.txt` files that provide set of directives and instructions describing the project's source files and targets (executable, library, or both).
+### Scenario 1: Pre-emptive (WITHOUT Time Slicing)
 
-Below is short explanation of remaining files in the project folder.
+In this mode, `LowPrioTask` (Prio 0) will run and **starve** `IdleTask` (also Prio 0) because time-slicing is OFF.
 
-```
-├── CMakeLists.txt
-├── pytest_hello_world.py      Python script used for automated testing
-├── main
-│   ├── CMakeLists.txt
-│   └── hello_world_main.c
-└── README.md                  This is the file you are currently reading
-```
+**Configuration:**
+1.  Open `FreeRTOSConfig.h`.
+2.  Find or add the following lines to turn **OFF** time-slicing but keep preemption ON.
+    ```h
+    #define configUSE_PREEMPTION 1
+    #define configUSE_TIME_SLICING 0
+    ```
+3.  Save the file and re-build the project.
 
-For more information on structure and contents of ESP-IDF projects, please refer to Section [Build System](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/build-system.html) of the ESP-IDF Programming Guide.
+---
 
-## Troubleshooting
+### Scenario 2: Pre-emptive (WITH Time Slicing) - Default Mode
 
-* Program upload failure
+This is the standard, default behavior. Both preemption and time-slicing are ON. The two Prio 0 tasks will share CPU time.
 
-    * Hardware connection is not correct: run `idf.py -p PORT monitor`, and reboot your board to see if there are any output logs.
-    * The baud rate for downloading is too high: lower your baud rate in the `menuconfig` menu, and try again.
+**Configuration:**
+1.  Open `FreeRTOSConfig.h`.
+2.  Ensure the following lines are defined and set to 1:
+    ```h
+    #define configUSE_PREEMPTION 1
+    #define configUSE_TIME_SLICING 1
+    ```
+3.  Save the file and re-build the project.
 
-## Technical support and feedback
+---
 
-Please use the following feedback channels:
+### Scenario 3: Co-operative Scheduling
 
-* For technical queries, go to the [esp32.com](https://esp32.com/) forum
-* For a feature request or bug report, create a [GitHub issue](https://github.com/espressif/esp-idf/issues)
+In this mode, we **turn OFF preemption**. The scheduler can no longer force a task to stop.
 
-We will get back to you as soon as possible.
+**Configuration:**
+1.  Open `FreeRTOSConfig.h`.
+2.  Set `configUSE_PREEMPTION` to 0. The value of `configUSE_TIME_SLICING` no longer matters.
+    ```h
+    #define configUSE_PREEMPTION 0
+    #define configUSE_TIME_SLICING 1 // This no longer has any effect
+    ```
+3.  Save the file and re-build the project.
+4.  **Important:** For this scenario, you must also modify the C code. `LowPrioTask` must be a "co-operative" task, so you **must add `taskYIELD();`** inside its `while(1)` loop.
