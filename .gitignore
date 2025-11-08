@@ -9,11 +9,8 @@
 *.elf
 
 # SDK configuration backup files created by menuconfig
-/sdkconfig.old
-/sdkconfig.bak
-
-# VS Code specific settings (optional, but recommended for team projects)
-.vscode/
+*/sdkconfig.old
+*/sdkconfig.bak
 
 # This file is generated on Windows and should not be committed
 /project.emproject
