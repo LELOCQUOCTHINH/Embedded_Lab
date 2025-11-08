@@ -1,0 +1,13 @@
+# Target labels
+ bootloader
+# Source files and their labels
+E:/embedded_course_prj/lab3/build/CMakeFiles/bootloader
+E:/embedded_course_prj/lab3/build/CMakeFiles/bootloader.rule
+E:/embedded_course_prj/lab3/build/CMakeFiles/bootloader-complete.rule
+E:/embedded_course_prj/lab3/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+E:/embedded_course_prj/lab3/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+E:/embedded_course_prj/lab3/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+E:/embedded_course_prj/lab3/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+E:/embedded_course_prj/lab3/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+E:/embedded_course_prj/lab3/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+E:/embedded_course_prj/lab3/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule
