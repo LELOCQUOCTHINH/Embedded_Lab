@@ -17,8 +17,8 @@
 #define TIMER_ID_IHAHA    1
 
 /* Constants for the timer periods (converted to ticks). */
-#define TIMER_PERIOD_2S   pdMS_TO_TICKS( 2000 )
-#define TIMER_PERIOD_3S   pdMS_TO_TICKS( 3000 )
+#define TIMER_PERIOD_AHIHI   pdMS_TO_TICKS( 2000 )
+#define TIMER_PERIOD_IHAHA   pdMS_TO_TICKS( 3000 )
 
 /* Execution limits for each timer. */
 #define MAX_EXEC_COUNT_AHIHI  10
@@ -114,7 +114,7 @@ void app_main( void )
      */
     xTimerAhihi = xTimerCreate(
                     "Timer_Ahihi",          /* Text name for debugging. */
-                    TIMER_PERIOD_2S,        /* Timer period in ticks. */
+                    TIMER_PERIOD_AHIHI,        /* Timer period in ticks. */
                     pdTRUE,                 /* Auto-reload enabled. */
                     ( void * ) TIMER_ID_AHIHI, /* ID used in the callback. */
                     vSharedTimerCallback    /* The shared callback function. */
@@ -127,7 +127,7 @@ void app_main( void )
      */
     xTimerIhaha = xTimerCreate(
                     "Timer_Ihaha",          /* Text name. */
-                    TIMER_PERIOD_3S,        /* Period. */
+                    TIMER_PERIOD_IHAHA,        /* Period. */
                     pdTRUE,                 /* Auto-reload enabled. */
                     ( void * ) TIMER_ID_IHAHA, /* ID used in the callback. */
                     vSharedTimerCallback    /* The shared callback function. */
