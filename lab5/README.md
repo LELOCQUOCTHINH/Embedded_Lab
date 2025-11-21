@@ -1,53 +1,50 @@
-| Supported Targets | ESP32 | ESP32-C2 | ESP32-C3 | ESP32-C5 | ESP32-C6 | ESP32-C61 | ESP32-H2 | ESP32-H21 | ESP32-H4 | ESP32-P4 | ESP32-S2 | ESP32-S3 | Linux |
-| ----------------- | ----- | -------- | -------- | -------- | -------- | --------- | -------- | --------- | -------- | -------- | -------- | -------- | ----- |
+# FreeRTOS Software Timer Demo: Shared Callback Function
 
-# Hello World Example
+## Overview
 
-Starts a FreeRTOS task to print "Hello World".
+This project demonstrates the efficient use of **FreeRTOS Software Timers**. Specifically, it illustrates how to utilize a **single shared callback function** to handle multiple timer instances within an embedded system.
 
-(See the README.md file in the upper level 'examples' directory for more information about examples.)
+By assigning unique IDs to each timer, the system can differentiate between them within the shared callback context (Daemon Task). This approach allows for distinct behaviors and execution limits without the overhead of creating separate function pointers for each timer, optimizing code maintenance and memory usage.
 
-## How to use example
+## Features
 
-Follow detailed instructions provided specifically for this example.
+* **Multiple Timers:** Creates two independent software timers running in parallel.
+* **Shared Callback:** Uses a single `vSharedTimerCallback` function to handle logic for both timers, reducing code duplication.
+* **Timer ID Management:** Demonstrates the use of `pvTimerID` and `pvTimerGetTimerID()` to identify the calling timer.
+* **Execution Limiting:** Implements logic to automatically stop a timer after a specific number of executions (simulating a finite task).
+* **State Transition:** Shows the transition from the *Running* state to the *Dormant* state using `xTimerStop()`.
 
-Select the instructions depending on Espressif chip installed on your development board:
+## Technical Details
 
-- [ESP32 Getting Started Guide](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/index.html)
-- [ESP32-S2 Getting Started Guide](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/get-started/index.html)
+### Timer Configuration
 
+| Timer Name | Period | Type | Max Executions | Behavior |
+| :--- | :--- | :--- | :--- | :--- |
+| **Timer_Ahihi** | 2000 ms (2s) | Auto-reload | 10 | Prints "ahihi" and increments its specific counter. |
+| **Timer_Ihaha** | 3000 ms (3s) | Auto-reload | 5 | Prints "ihaha" and increments its specific counter. |
 
-## Example folder contents
+### Key API Functions Used
 
-The project **hello_world** contains one source file in C language [hello_world_main.c](main/hello_world_main.c). The file is located in folder [main](main).
+* `xTimerCreate()`: Instantiates the timers with specific IDs (`pvTimerID`).
+* `xTimerStart()`: Transitions timers from the *Dormant* to the *Running* state.
+* `pvTimerGetTimerID()`: Retrieves the ID inside the callback to determine the active timer.
+* `xTimerStop()`: Stops the timer when the execution limit is reached.
 
-ESP-IDF projects are built using CMake. The project build configuration is contained in `CMakeLists.txt` files that provide set of directives and instructions describing the project's source files and targets (executable, library, or both).
+## Expected Output
 
-Below is short explanation of remaining files in the project folder.
+Upon running the application, the serial monitor/console will display logs similar to the following sequence:
 
-```
-├── CMakeLists.txt
-├── pytest_hello_world.py      Python script used for automated testing
-├── main
-│   ├── CMakeLists.txt
-│   └── hello_world_main.c
-└── README.md                  This is the file you are currently reading
-```
-
-For more information on structure and contents of ESP-IDF projects, please refer to Section [Build System](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/build-system.html) of the ESP-IDF Programming Guide.
-
-## Troubleshooting
-
-* Program upload failure
-
-    * Hardware connection is not correct: run `idf.py -p PORT monitor`, and reboot your board to see if there are any output logs.
-    * The baud rate for downloading is too high: lower your baud rate in the `menuconfig` menu, and try again.
-
-## Technical support and feedback
-
-Please use the following feedback channels:
-
-* For technical queries, go to the [esp32.com](https://esp32.com/) forum
-* For a feature request or bug report, create a [GitHub issue](https://github.com/espressif/esp-idf/issues)
-
-We will get back to you as soon as possible.
+```text
+--- Starting Software Timer Demo ---
+Timers created and started successfully.
+ahihi - Count: 1 (Time: 2000 ms)
+ihaha - Count: 1 (Time: 3000 ms)
+ahihi - Count: 2 (Time: 4000 ms)
+ahihi - Count: 3 (Time: 6000 ms)
+ihaha - Count: 2 (Time: 6000 ms)
+...
+ihaha - Count: 5 (Time: 15000 ms)
+>> Timer 'ihaha' reached limit (5). Stopping timer.
+...
+ahihi - Count: 10 (Time: 20000 ms)
+>> Timer 'ahihi' reached limit (10). Stopping timer.
